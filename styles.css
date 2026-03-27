@@ -148,3 +148,12 @@ main {
 .animation-fade-in { animation: fadeIn 0.4s ease-out; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 .mt-auto { margin-top: auto; }
+
+.multi-tag-table-container { background: rgba(0,0,0,0.2); border: 1px solid var(--border-glass); border-radius: 12px; padding: 16px; }
+.tag-table { width: 100%; border-collapse: collapse; }
+.tag-table td { padding: 10px 5px; border-bottom: 1px dashed rgba(255,255,255,0.05); }
+.tag-table tr:last-child td { border-bottom: none; }
+.tag-name { color: #f8fafc; font-size: 0.9rem; font-weight: 500; }
+.tag-percent { color: #94a3b8; font-size: 0.85rem; text-align: right; padding-right: 15px; font-variant-numeric: tabular-nums; }
+.progress-bg { width: 100%; height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden; }
+.progress-fill { height: 100%; border-radius: 4px; transition: width 1s cubic-bezier(0.4, 0, 0.2, 1); }

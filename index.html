@@ -6,7 +6,13 @@
   <title>PrepMaster AI - Admin Dashboard</title>
   
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./styles.css?v=3">
+  
+  <!-- KaTeX CSS & JS for Math Rendering -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
+
+  <link rel="stylesheet" href="./styles.css?v=4">
 
   <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
@@ -71,6 +77,20 @@ function App() {
   ]);
   const [correctAnswer, setCorrectAnswer] = useState('A');
 
+  // KaTeX Auto Render Trigger
+  useEffect(() => {
+    if (result && window.renderMathInElement) {
+       window.renderMathInElement(document.getElementById('math-container'), {
+          delimiters: [
+             {left: '$$', right: '$$', display: true},
+             {left: '$', right: '$', display: false},
+             {left: '\\(', right: '\\)', display: false},
+             {left: '\\[', right: '\\]', display: true}
+          ]
+       });
+    }
+  }, [result]);
+
   const updateOptionType = (idx, type) => {
     const newOptions = [...options];
     newOptions[idx].type = type;
@@ -101,7 +121,7 @@ function App() {
             setIsOCRRunning(true);
             // 가짜 딜레이 후 텍스트 채우기 (나중에 실제 Gemini API 연동 부위)
             setTimeout(() => {
-                setProblemText(prev => prev + (prev ? "\n" : "") + "\\int_{0}^{\\infty} e^{-x^2} dx = \\frac{\\sqrt{\\pi}}{2}");
+                setProblemText(prev => prev + (prev ? "\n\n" : "") + "함수 $f(x)$가 다음과 같이 주어질 때,\n$$ \\int_{0}^{\\infty} e^{-x^2} dx = \\frac{\\sqrt{\\pi}}{2} $$\n위 등식을 만족하는 해를 구하시오.");
                 setIsOCRRunning(false);
             }, 1200);
             return;
@@ -149,7 +169,11 @@ function App() {
     setTimeout(() => {
       setResult({
         translatedText: problemText || "(오직 이미지로만 출제된 문항입니다)",
-        tags: ["대방동 기출", "단원: 수2", "문항유형: 복합(하이브리드)"],
+        multiTags: [
+          { name: "Quadratic function", percent: 50, color: "#f472b6" },
+          { name: "Inverse function", percent: 30, color: "#a78bfa" },
+          { name: "Arithmetic calculation", percent: 20, color: "#60a5fa" }
+        ],
         initialDifficulty: 8.5,
         attachedImage: problemImage,
         finalOptions: options,
@@ -272,18 +296,28 @@ function App() {
 
           {!isAnalyzing && result && (
             <div className="result-container animation-fade-in">
-              <div className="tags-row mb-3">
-                {result.tags.map((tag, idx) => (
-                  <span key={idx} className="tag-chip">✓ {tag}</span>
-                ))}
-                <span className="tag-chip" style={{color: '#f472b6', borderColor: 'rgba(244,114,182,0.3)', background: 'rgba(244,114,182,0.1)'}}>
-                   AI 측정 난이도: {result.initialDifficulty}
-                </span>
+              <div className="multi-tag-table-container mb-3">
+                 <h3 className="preview-box-title mb-2">📊 AI 다중 유형 분류 결과 (Multi-tagging)</h3>
+                 <table className="tag-table">
+                    <tbody>
+                       {result.multiTags.map((tag, idx) => (
+                          <tr key={idx}>
+                             <td width="45%" className="tag-name">{tag.name}</td>
+                             <td width="15%" className="tag-percent">{tag.percent}%</td>
+                             <td width="40%">
+                                <div className="progress-bg">
+                                   <div className="progress-fill" style={{width: `${tag.percent}%`, backgroundColor: tag.color}}></div>
+                                </div>
+                             </td>
+                          </tr>
+                       ))}
+                    </tbody>
+                 </table>
               </div>
 
               <div className="preview-box">
                  <h3 className="preview-box-title">[AI가 번역 추출한 문제 텍스트]</h3>
-                 <div className="preview-content">{result.translatedText || "(내용 없음)"}</div>
+                 <div className="preview-content" id="math-container" dangerouslySetInnerHTML={{__html: result.translatedText?.replace(/\n/g, '<br/>') || "(내용 없음)"}}></div>
                  
                  {result.attachedImage && (
                     <div className="mt-3">
