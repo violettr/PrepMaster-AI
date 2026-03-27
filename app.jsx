@@ -2,70 +2,106 @@ const { useState, useEffect } = React;
 
 function App() {
   const [problemText, setProblemText] = useState("");
+  const [problemImage, setProblemImage] = useState(null);
+  const [isOCRRunning, setIsOCRRunning] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [result, setResult] = useState(null);
 
-  // Gemini AI 가짜 시뮬레이션 및 수학 로직
+  const [options, setOptions] = useState([
+    { id: 'A', type: 'text', content: '' },
+    { id: 'B', type: 'text', content: '' },
+    { id: 'C', type: 'text', content: '' },
+    { id: 'D', type: 'text', content: '' },
+    { id: 'E', type: 'text', content: '' }
+  ]);
+  const [correctAnswer, setCorrectAnswer] = useState('A');
+
+  const updateOptionType = (idx, type) => {
+    const newOptions = [...options];
+    newOptions[idx].type = type;
+    newOptions[idx].content = '';
+    setOptions(newOptions);
+  };
+
+  const updateOptionContent = (idx, content) => {
+    const newOptions = [...options];
+    newOptions[idx].content = content;
+    setOptions(newOptions);
+  };
+
+  const fileToDataURL = (file) => {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (e) => resolve(e.target.result);
+      reader.readAsDataURL(file);
+    });
+  };
+
+  // 문제 텍스트 상자 붙여넣기 인식 (Gemini OCR 자동 시뮬레이션)
+  const handleTextPaste = async (e) => {
+    const items = e.clipboardData.items;
+    for (let i = 0; i < items.length; i++) {
+        if (items[i].type.indexOf("image") !== -1) {
+            e.preventDefault();
+            setIsOCRRunning(true);
+            // 가짜 딜레이 후 텍스트 채우기 (나중에 실제 Gemini API 연동 부위)
+            setTimeout(() => {
+                setProblemText(prev => prev + (prev ? "\n" : "") + "\\int_{0}^{\\infty} e^{-x^2} dx = \\frac{\\sqrt{\\pi}}{2}");
+                setIsOCRRunning(false);
+            }, 1200);
+            return;
+        }
+    }
+  };
+
+  // 도표/그림 상자 방으로 이미지 붙여넣기
+  const handleImagePaste = async (e) => {
+    const items = e.clipboardData.items;
+    for (let i = 0; i < items.length; i++) {
+        if (items[i].type.indexOf("image") !== -1) {
+            e.preventDefault();
+            const file = items[i].getAsFile();
+            const url = await fileToDataURL(file);
+            setProblemImage(url);
+            return;
+        }
+    }
+  };
+
+  // 보기 전용 미니 상자 붙여넣기 기능
+  const handleOptionImagePaste = async (e, idx) => {
+    const items = e.clipboardData.items;
+    for (let i = 0; i < items.length; i++) {
+        if (items[i].type.indexOf("image") !== -1) {
+            e.preventDefault();
+            const file = items[i].getAsFile();
+            const url = await fileToDataURL(file);
+            updateOptionContent(idx, url);
+            return;
+        }
+    }
+  };
+
   const handleAnalyze = () => {
-    if (!problemText.trim()) {
-      alert("문제 텍스트를 입력해주세요!");
+    if (!problemText.trim() && !problemImage) {
+      alert("문제 텍스트나 그림 스샷을 최소 하나는 붙여넣어 주세요!");
       return;
     }
-
     setIsAnalyzing(true);
     setResult(null);
 
-    // AI 통신을 시뮬레이션하기 위한 지연 시간 (2.5초)
+    // 대시보드 로직 맵핑 대기 시뮬레이션
     setTimeout(() => {
-      // 1. "나누어 떨어진다" -> "evenly" 번역 검증 프로세스
-      let processedText = problemText;
-      if (processedText.includes("나누어 떨어진다") || processedText.includes("나누어 떨어")) {
-         processedText += "\n(Gemini번역 변환: '...divides evenly...')";
-      }
-
-      // 2. 숫자를 추출하거나 임의의 숫자를 정답으로 가정함
-      const baseValue = Math.floor(Math.random() * 50) + 10;
-      
-      // 3. 오답(Distractors) 생성 
-      // 알고리즘: 정답보다 작은 수와 큰 수의 개수를 무작위로 결정하여 정답 위치를 완벽히 분산시킴 (Uniform Distribution)
-      const smallerCount = Math.floor(Math.random() * 5); // 0, 1, 2, 3, 4 개
-      const largerCount = 4 - smallerCount; 
-      
-      const optionsArray = [baseValue]; // 원래 정답
-
-      // 정답보다 작은 오답 생성
-      for(let i = 0; i < smallerCount; i++){
-          optionsArray.push(baseValue - (i + 1) * 3 - Math.floor(Math.random()*2));
-      }
-      
-      // 정답보다 큰 오답 생성
-      for(let i = 0; i < largerCount; i++){
-          optionsArray.push(baseValue + (i + 1) * 3 + Math.floor(Math.random()*2));
-      }
-
-      // 4. 반드시 **오름차순(Ascending)**으로 정렬
-      optionsArray.sort((a, b) => a - b);
-
-      // 5. 알파벳(A~E)과 결합
-      const letters = ['A', 'B', 'C', 'D', 'E'];
-      const finalOptions = optionsArray.map((val, index) => {
-        return {
-           label: letters[index],
-           value: val,
-           isCorrect: val === baseValue // 원래 정답 찾아냄
-        };
+      setResult({
+        translatedText: problemText || "(오직 이미지로만 출제된 문항입니다)",
+        tags: ["대방동 기출", "단원: 수2", "문항유형: 복합(하이브리드)"],
+        initialDifficulty: 8.5,
+        attachedImage: problemImage,
+        finalOptions: options,
+        answer: correctAnswer
       });
-
-      const analysisResult = {
-        translatedText: processedText,
-        tags: ["대수학(Algebra)", "인수분해", "연산부하: Medium"],
-        initialDifficulty: 7.2,
-        options: finalOptions
-      };
-
-      setResult(analysisResult);
       setIsAnalyzing(false);
-    }, 2500);
+    }, 2000);
   };
 
   return (
@@ -80,103 +116,150 @@ function App() {
       </header>
 
       <main>
-        {/* 왼쪽 섹션: 문제 입력 */}
+        {/* 왼쪽 섹션: 입력 상자들 */}
         <section className="card input-section">
-          <h2>1. 수학 문제 업로드</h2>
+          <h2>1. 수학 문제 스마트 업로드 (투 컷 스니핑)</h2>
           
-          <div className="upload-area">
-            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginBottom: '10px'}}>
-              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-              <circle cx="8.5" cy="8.5" r="1.5"></circle>
-              <polyline points="21 15 16 10 5 21"></polyline>
-            </svg>
-            <p>이미지를 드래그 앤 드롭 하세요</p>
-            <p style={{fontSize: '0.8rem', marginTop: '5px'}}>(또는 클릭하여 선택)</p>
+          <div className="input-group">
+            <label>📝 예시 문항 텍스트 (수식 스샷을 여기서 Ctrl+V 하면 1초 만에 자동 타이핑!)</label>
+            <div className="textarea-wrapper">
+               {isOCRRunning && (
+                 <div className="ocr-overlay">
+                    <span className="spinner"></span>
+                    Gemini 비전이 이미지를 읽고 문자로 추출 중입니다...
+                 </div>
+               )}
+               <textarea 
+                 className="textarea-input" 
+                 placeholder="텍스트를 직접 치거나, 컴퓨터 화면의 글자를 캡처해서 바로 컨트롤+V 해보세요!"
+                 value={problemText}
+                 onChange={(e) => setProblemText(e.target.value)}
+                 onPaste={handleTextPaste}
+               ></textarea>
+            </div>
           </div>
 
-          <p style={{textAlign: 'center', color: '#94a3b8', fontSize: '0.9rem', margin: '5px 0'}}>OR</p>
+          <div className="input-group mt-3">
+            <label>📸 도형/그래프 원본 사진 첨부 (그림만 네모낳게 스샷 따서 Ctrl+V)</label>
+            <div 
+              className={`upload-area ${problemImage ? 'has-image' : ''}`}
+              onPaste={handleImagePaste}
+              tabIndex="0"
+            >
+              {problemImage ? (
+                <div className="image-preview-container">
+                   <img src={problemImage} alt="첨부됨" className="preview-image" />
+                   <button className="remove-btn" onClick={(e) => { e.stopPropagation(); setProblemImage(null); }}>삭제</button>
+                </div>
+              ) : (
+                <>
+                  <p>이 상자를 클릭한 후 그림(스샷)을 붙여넣으세요 (Ctrl+V)</p>
+                  <p style={{fontSize: '0.8rem', color: '#94a3b8', marginTop: '5px'}}>(자동 크롭 없이 가장 깔끔하고 오류 없는 원본 그림 저장 방식)</p>
+                </>
+              )}
+            </div>
+          </div>
 
-          <textarea 
-            className="textarea-input" 
-            placeholder="수학 문제 텍스트를 직접 입력하세요.&#13;&#10;(예: x는 15로 나누어 떨어진다. x의 값을 구하시오.)"
-            value={problemText}
-            onChange={(e) => setProblemText(e.target.value)}
-          ></textarea>
+          <div className="input-group mt-3">
+            <label>🎯 선다형 보기(A~E) 입력란 - (자유형 토글)</label>
+            <div className="options-manual-container">
+              {options.map((opt, idx) => (
+                <div key={idx} className={`manual-option-row ${correctAnswer === opt.id ? 'is-correct-row' : ''}`}>
+                    <input 
+                      type="radio" 
+                      name="correct" 
+                      checked={correctAnswer === opt.id} 
+                      onChange={() => setCorrectAnswer(opt.id)} 
+                      title="이 보기를 정답으로 지정"
+                    />
+                    <span className="option-letter">{opt.id}</span>
+                    <select className="type-select" onChange={(e) => updateOptionType(idx, e.target.value)} value={opt.type}>
+                       <option value="text">문자 치기</option>
+                       <option value="image">스샷(Ctrl+V)</option>
+                    </select>
+                    
+                    {opt.type === 'text' ? (
+                        <input type="text" className="text-input flex-1" placeholder="보기 내용 입력..." value={opt.content} onChange={(e)=>updateOptionContent(idx, e.target.value)} />
+                    ) : (
+                        <div className="mini-upload-area flex-1" tabIndex="0" onPaste={(e)=>handleOptionImagePaste(e, idx)}>
+                           {opt.content ? <img src={opt.content} className="mini-preview" /> : "여기를 클릭하고 스샷 Ctrl+V"}
+                        </div>
+                    )}
+                </div>
+              ))}
+            </div>
+          </div>
 
-          <button 
-            className="btn-primary" 
-            onClick={handleAnalyze} 
-            disabled={isAnalyzing}
-          >
-            {isAnalyzing ? (
-              <><span className="spinner"></span> Gemini 3.1 Pro 분석 중...</>
-            ) : "✨ AI 문제 태깅 및 분산 로직 실행"}
+          <button className="btn-primary mt-4" onClick={handleAnalyze} disabled={isAnalyzing || isOCRRunning}>
+             {isAnalyzing ? (
+                <><span className="spinner"></span> AI 문항 검증 및 태깅 중...</>
+             ) : "✨ 내용 확정 및 AI 안심 검증 실행"}
           </button>
         </section>
 
-        {/* 오른쪽 섹션: AI 분석 결과 */}
+        {/* 오른쪽 섹션: 검증 결과물 */}
         <section className="card output-section">
-          <h2>2. AI 분석 결과 (Firestore 저장 대기)</h2>
+          <h2>2. 미리보기 및 AI 데이터 맵핑 결과</h2>
           
           {isAnalyzing && (
-            <div style={{display: 'flex', flexDirection: 'column', gap: '15px', marginTop: '10px'}}>
+             <div className="skeleton-container">
                <div className="skeleton"></div>
                <div className="skeleton" style={{width: '70%'}}></div>
                <div className="skeleton" style={{width: '85%'}}></div>
-               <div style={{marginTop: '20px'}}>정답 알파벳 완벽 분산 알고리즘 처리중...</div>
-               <div className="skeleton" style={{height: '150px', borderRadius: '12px'}}></div>
-            </div>
+             </div>
           )}
 
           {!isAnalyzing && !result && (
-            <div style={{height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#475569'}}>
-              좌측에서 문제를 입력하고 실행해 주세요.
+            <div className="empty-state">
+              좌측에서 스마트 복붙으로 문제를 올린 후 실행 버튼을 눌러주세요.
             </div>
           )}
 
           {!isAnalyzing && result && (
-            <div style={{display: 'flex', flexDirection: 'column', gap: '25px', animation: 'fadeIn 0.5s'}}>
-              
-              <div>
-                 <h3 style={{fontSize: '0.9rem', color: '#94a3b8', marginBottom: '10px'}}>자동 추출 태그</h3>
-                 <div className="tags-row">
-                    {result.tags.map((tag, idx) => (
-                      <span key={idx} className="tag-chip">✓ {tag}</span>
-                    ))}
-                    <span className="tag-chip" style={{color: '#f472b6', borderColor: 'rgba(244,114,182,0.3)', background: 'rgba(244,114,182,0.1)'}}>
-                       AI 초기 난이도: {result.initialDifficulty}
-                    </span>
-                 </div>
+            <div className="result-container animation-fade-in">
+              <div className="tags-row mb-3">
+                {result.tags.map((tag, idx) => (
+                  <span key={idx} className="tag-chip">✓ {tag}</span>
+                ))}
+                <span className="tag-chip" style={{color: '#f472b6', borderColor: 'rgba(244,114,182,0.3)', background: 'rgba(244,114,182,0.1)'}}>
+                   AI 측정 난이도: {result.initialDifficulty}
+                </span>
               </div>
 
-              <div>
-                 <h3 style={{fontSize: '0.9rem', color: '#94a3b8', marginBottom: '10px'}}>수학 번역 처리 ("evenly" 강제 규정 적용)</h3>
-                 <div style={{background: 'rgba(0,0,0,0.3)', padding: '12px', borderRadius: '8px', fontSize: '0.9rem'}}>
-                    {result.translatedText}
-                 </div>
+              <div className="preview-box">
+                 <h3 className="preview-box-title">[AI가 번역 추출한 문제 텍스트]</h3>
+                 <div className="preview-content">{result.translatedText || "(내용 없음)"}</div>
+                 
+                 {result.attachedImage && (
+                    <div className="mt-3">
+                       <h3 className="preview-box-title">[별도 첨부된 도표/원본 그림]</h3>
+                       <img src={result.attachedImage} className="result-image" />
+                    </div>
+                 )}
               </div>
 
-              <div>
-                 <h3 style={{fontSize: '0.9rem', color: '#94a3b8', marginBottom: '10px'}}>생성된 보기 (반드시 오름차순 정렬)</h3>
-                 <div className="options-list">
-                    {result.options.map((opt, idx) => (
-                      <div key={idx} className={`option-item ${opt.isCorrect ? 'correct' : ''}`}>
-                         <div className="option-label">
-                            <span className="option-letter">{opt.label}</span>
-                            <span className="option-value">{opt.value}</span>
+              <div className="mt-4">
+                 <h3 className="preview-box-title mb-2">[보기 출력 미리보기]</h3>
+                 <div className="options-grid">
+                    {result.finalOptions.map((opt, idx) => (
+                      <div key={idx} className={`result-option ${opt.id === result.answer ? 'correct-highlight' : ''}`}>
+                         <div className="option-letter-small">{opt.id}</div>
+                         <div className="option-content-flex">
+                           {opt.type === 'text' ? opt.content || '(입력 안 됨)' : (
+                              opt.content ? <img src={opt.content} className="result-mini-image"/> : '(그림 없음)'
+                           )}
                          </div>
-                         {opt.isCorrect && <span className="badge">정답 자동분산 됨</span>}
+                         {opt.id === result.answer && <span className="answer-badge">정답 OMR</span>}
                       </div>
                     ))}
                  </div>
               </div>
 
-              <button className="btn-primary" style={{marginTop: 'auto', background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)'}}>
-                 ☁️ Firebase Firestore에 저장
+              <button className="btn-primary mt-auto">
+                 ☁️ 이 완벽한 문항(Item)을 원장님 DB에 최종 저장
               </button>
             </div>
           )}
-
         </section>
       </main>
     </>

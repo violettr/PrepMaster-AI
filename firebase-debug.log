@@ -1,0 +1,36 @@
+[debug] [2026-03-27T08:50:24.050Z] ----------------------------------------------------------------------
+[debug] [2026-03-27T08:50:24.053Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\viole\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js deploy --only hosting
+[debug] [2026-03-27T08:50:24.054Z] CLI Version:   15.11.0
+[debug] [2026-03-27T08:50:24.054Z] Platform:      win32
+[debug] [2026-03-27T08:50:24.054Z] Node Version:  v25.8.2
+[debug] [2026-03-27T08:50:24.054Z] Time:          Fri Mar 27 2026 17:50:24 GMT+0900 (한국 표준시)
+[debug] [2026-03-27T08:50:24.054Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2026-03-27T08:50:25.645Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-03-27T08:50:25.645Z] > authorizing via signed-in user (violettr7@gmail.com)
+[debug] [2026-03-27T08:50:25.645Z] [iam] checking project prepmaster-ai for permissions ["firebase.projects.get","firebasehosting.sites.update"]
+[debug] [2026-03-27T08:50:25.647Z] Checked if tokens are valid: false, expires at: 1774601978009
+[debug] [2026-03-27T08:50:25.647Z] Checked if tokens are valid: false, expires at: 1774601978009
+[debug] [2026-03-27T08:50:25.647Z] > refreshing access token with scopes: []
+[debug] [2026-03-27T08:50:25.648Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-03-27T08:50:25.649Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-03-27T08:50:25.906Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-03-27T08:50:25.906Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-03-27T08:50:25.914Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/prepmaster-ai:testIamPermissions [none]
+[debug] [2026-03-27T08:50:25.914Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/prepmaster-ai:testIamPermissions  x-goog-user-project=prepmaster-ai
+[debug] [2026-03-27T08:50:25.914Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/prepmaster-ai:testIamPermissions {"permissions":["firebase.projects.get","firebasehosting.sites.update"]}
+[debug] [2026-03-27T08:50:26.275Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/prepmaster-ai:testIamPermissions 200
+[debug] [2026-03-27T08:50:26.276Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/prepmaster-ai:testIamPermissions {"permissions":["firebase.projects.get","firebasehosting.sites.update"]}
+[debug] [2026-03-27T08:50:26.278Z] Checked if tokens are valid: true, expires at: 1774605024906
+[debug] [2026-03-27T08:50:26.278Z] Checked if tokens are valid: true, expires at: 1774605024906
+[debug] [2026-03-27T08:50:26.279Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/prepmaster-ai [none]
+[debug] [2026-03-27T08:50:26.794Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/prepmaster-ai 200
+[debug] [2026-03-27T08:50:26.794Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/prepmaster-ai {"projectId":"prepmaster-ai","projectNumber":"33674326752","displayName":"PrepMaster-AI","name":"projects/prepmaster-ai","resources":{"hostingSite":"prepmaster-ai"},"state":"ACTIVE","etag":"1_41a3c9de-42b6-4dfe-bf87-511069118ff8"}
+[info] 
+[info] === Deploying to 'prepmaster-ai'...
+[info] 
+[info] i  deploying hosting 
+[debug] [2026-03-27T08:50:26.797Z] Checked if tokens are valid: true, expires at: 1774605024906
+[debug] [2026-03-27T08:50:26.797Z] Checked if tokens are valid: true, expires at: 1774605024906
+[debug] [2026-03-27T08:50:26.798Z] >>> [apiv2][query] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/prepmaster-ai/versions [none]
+[debug] [2026-03-27T08:50:26.798Z] >>> [apiv2][body] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/prepmaster-ai/versions {"status":"CREATED","labels":{"deployment-tool":"cli-firebase"}}
