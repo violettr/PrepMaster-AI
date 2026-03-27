@@ -1,0 +1,300 @@
+/* 테마 변수 설정 (Dark Premium) */
+:root {
+  --bg-dark: #0b0f19;
+  --bg-glass: rgba(255, 255, 255, 0.03);
+  --border-glass: rgba(255, 255, 255, 0.08);
+  --glow-primary: #4ade80; /* 고급스러운 에메랄드 그린 */
+  --glow-secondary: #3b82f6; /* 신뢰감을 주는 블루 */
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --radius: 16px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg-dark);
+  color: var(--text-main);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+}
+
+/* 감각적인 백그라운드 그라데이션 원형 조명 */
+.bg-glow-1, .bg-glow-2 {
+  position: absolute;
+  width: 500px;
+  height: 500px;
+  border-radius: 50%;
+  filter: blur(140px);
+  z-index: -1;
+  opacity: 0.25;
+}
+.bg-glow-1 {
+  top: -100px;
+  left: -200px;
+  background: var(--glow-secondary);
+}
+.bg-glow-2 {
+  bottom: -100px;
+  right: -200px;
+  background: var(--glow-primary);
+}
+
+header {
+  height: 80px;
+  display: flex;
+  align-items: center;
+  padding: 0 40px;
+  border-bottom: 1px solid var(--border-glass);
+  background: rgba(11, 15, 25, 0.7);
+  backdrop-filter: blur(12px);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.logo {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  background: linear-gradient(135deg, #fff 0%, #a8b2d1 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo span {
+  font-size: 0.9rem;
+  font-weight: 500;
+  background: var(--bg-glass);
+  padding: 4px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border-glass);
+  -webkit-text-fill-color: var(--glow-primary);
+}
+
+main {
+  padding: 40px;
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.card {
+  background: var(--bg-glass);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius);
+  padding: 30px;
+  backdrop-filter: blur(20px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.card h2 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--text-main);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 1px solid var(--border-glass);
+  padding-bottom: 15px;
+}
+
+/* 업로드 영역 */
+.upload-area {
+  border: 2px dashed rgba(148, 163, 184, 0.4);
+  border-radius: var(--radius);
+  height: 150px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.upload-area:hover {
+  border-color: var(--glow-secondary);
+  background: rgba(59, 130, 246, 0.05);
+  color: #fff;
+}
+
+.textarea-input {
+  width: 100%;
+  height: 120px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--border-glass);
+  border-radius: 12px;
+  padding: 15px;
+  color: #fff;
+  font-family: inherit;
+  font-size: 0.95rem;
+  resize: none;
+  outline: none;
+  transition: border 0.3s;
+}
+
+.textarea-input:focus {
+  border-color: var(--glow-primary);
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: #fff;
+  border: none;
+  padding: 14px;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+.btn-primary:disabled {
+  background: #334155;
+  color: #94a3b8;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+/* 태그 칩스 */
+.tags-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.tag-chip {
+  background: rgba(59, 130, 246, 0.15);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  color: #60a5fa;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* 보기(단답형) 출력 리스트 */
+.options-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.option-item {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--border-glass);
+  padding: 14px 20px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: all 0.3s;
+}
+
+.option-item.correct {
+  background: rgba(16, 185, 129, 0.1);
+  border-color: #10b981;
+}
+
+.option-label {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  font-size: 1.1rem;
+}
+
+.option-letter {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.option-item.correct .option-letter {
+  background: #10b981;
+}
+
+.option-value {
+  font-weight: 500;
+}
+
+.badge {
+  background: #10b981;
+  color: #fff;
+  font-size: 0.7rem;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-weight: bold;
+  letter-spacing: 0.5px;
+}
+
+/* 로딩 스피너 애니메이션 */
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 3px solid rgba(255,255,255,0.3);
+  border-radius: 50%;
+  border-top-color: #fff;
+  animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.skeleton {
+  background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+  border-radius: 8px;
+  height: 24px;
+  width: 100%;
+}
+
+@keyframes loading {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}

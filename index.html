@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PrepMaster AI - Admin Dashboard</title>
+  
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./styles.css">
+
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <style>
+    .toggle-container {
+        display: flex; gap: 10px; margin-top: 20px; margin-bottom: 20px;
+        background: rgba(0,0,0,0.3); border-radius: 12px; padding: 6px;
+    }
+    .toggle-btn {
+        flex: 1; padding: 12px; border: none; border-radius: 8px; cursor: pointer;
+        font-size: 0.95rem; font-weight: 600; color: #94a3b8; background: transparent;
+        transition: all 0.3s; display: flex; justify-content: center; align-items: center; gap: 8px;
+    }
+    .toggle-btn.active {
+        background: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.4);
+    }
+    .manual-input-row {
+        display: flex; align-items: center; gap: 12px; margin-bottom: 12px;
+    }
+    .manual-input-element {
+        flex: 1; padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08); 
+        background: rgba(0,0,0,0.2); color: #fff; outline:none; font-family: inherit; font-size: 0.95rem;
+    }
+    .manual-input-element:focus { border-color: #60a5fa; }
+    .radio-circle {
+        width: 28px; height: 28px; border-radius: 50%; border: 2px solid #64748b; 
+        cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s;
+    }
+    .radio-circle.selected { border-color: #10b981; }
+    .radio-circle.selected::after {
+        content: ''; width: 14px; height: 14px; background: #10b981; border-radius: 50%;
+    }
+    .validation-box {
+        background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3);
+        padding: 15px; border-radius: 12px; margin-bottom: 20px; 
+    }
+    .validation-title { color: #10b981; font-weight: 600; font-size: 1rem; display: flex; align-items: center; gap: 8px; margin-bottom: 8px;}
+    .validation-desc { color: #a7f3d0; font-size: 0.9rem; line-height: 1.4; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+
+    function App() {
+      const [problemText, setProblemText] = useState("");
+      const [isAnalyzing, setIsAnalyzing] = useState(false);
+      const [result, setResult] = useState(null);
+      
+      // 보기 입력 방식 모드: 'manual' (수동) | 'auto' (자동 방해보기 생성)
+      const [optionMode, setOptionMode] = useState("manual");
+      
+      // 수동 입력용 상태
+      const [manualOptions, setManualOptions] = useState(["", "", "", "", ""]);
+      const [manualCorrectIndex, setManualCorrectIndex] = useState(null);
+
+      const handleAnalyze = () => {
+        if (!problemText.trim()) {
+          alert("문제 텍스트를 입력해주세요!");
+          return;
+        }
+
+        if (optionMode === "manual") {
+           // 모두 채워졌는지, 정답 선택되었는지 확인
+           if (manualOptions.some(opt => !opt.trim())) {
+               alert("모든 보기 칸(A~E)을 채워주세요!");
+               return;
+           }
+           if (manualCorrectIndex === null) {
+               alert("우측 동그라미를 눌러 정답 항목을 마킹해 주세요!");
+               return;
+           }
+        }
+
+        setIsAnalyzing(true);
+        setResult(null);
+
+        setTimeout(() => {
+          let finalOptions = [];
+          
+          if (optionMode === "auto") {
+              const baseValue = Math.floor(Math.random() * 50) + 10;
+              const smallerCount = Math.floor(Math.random() * 5); 
+              const largerCount = 4 - smallerCount; 
+              
+              const optionsArray = [baseValue]; 
+              for(let i = 0; i < smallerCount; i++){ optionsArray.push(baseValue - (i + 1) * 3 - Math.floor(Math.random()*2)); }
+              for(let i = 0; i < largerCount; i++){ optionsArray.push(baseValue + (i + 1) * 3 + Math.floor(Math.random()*2)); }
+
+              optionsArray.sort((a, b) => a - b);
+              const letters = ['A', 'B', 'C', 'D', 'E'];
+              
+              finalOptions = optionsArray.map((val, index) => {
+                return {
+                   label: letters[index],
+                   value: val,
+                   isCorrect: val === baseValue
+                };
+              });
+          } else {
+              const letters = ['A', 'B', 'C', 'D', 'E'];
+              finalOptions = manualOptions.map((val, index) => {
+                  return {
+                      label: letters[index],
+                      value: val,
+                      isCorrect: index === manualCorrectIndex
+                  };
+              });
+          }
+
+          const analysisResult = {
+            tags: ["대수학(Algebra)", "인수분해", "연산부하: Medium"],
+            initialDifficulty: 7.2,
+            options: finalOptions,
+            mode: optionMode,
+            // Gemini가 백그라운드에서 문제를 풀어서 검증했다는 시뮬레이션
+            validationStatus: "PASS" 
+          };
+
+          setResult(analysisResult);
+          setIsAnalyzing(false);
+        }, 2500);
+      };
+
+      return (
+        <>
+          <div className="bg-glow-1"></div>
+          <div className="bg-glow-2"></div>
+
+          <header>
+            <div className="logo">
+              PrepMaster AI <span style={{fontSize: '0.9rem', fontWeight: 500, background: 'rgba(255, 255, 255, 0.03)', padding: '4px 10px', borderRadius: '8px', border: '1px solid rgba(255, 255, 255, 0.08)', color: '#4ade80'}}>Admin Dashboard</span>
+            </div>
+          </header>
+
+          <main>
+            <section className="card input-section">
+              <h2>1. 수학 문제 업로드 (기출 및 신규)</h2>
+
+              <textarea 
+                className="textarea-input" 
+                placeholder="과거 기출문제 혹은 신규 문제의 텍스트를 입력하세요.&#13;&#10;(에디터에 바로 붙여넣거나 직접 작성하실 수 있습니다.)"
+                value={problemText}
+                onChange={(e) => setProblemText(e.target.value)}
+                style={{height: '100px'}}
+              ></textarea>
+
+              {/* 스위치 버튼: 수동 지정 vs 자동 생성 */}
+              <div className="toggle-container">
+                <button className={`toggle-btn ${optionMode === 'manual' ? 'active' : ''}`} onClick={() => setOptionMode('manual')}>
+                  ✍️ 기출 저장 (보기 수동 입력)
+                </button>
+                <button className={`toggle-btn ${optionMode === 'auto' ? 'active' : ''}`} onClick={() => setOptionMode('auto')}>
+                  🤖 신규 출제 (AI 보기 자동 생성)
+                </button>
+              </div>
+
+              {/* 수동 모드일 때만 보이는 입력창 5개 */}
+              {optionMode === 'manual' && (
+                <div style={{marginBottom: '20px', padding: '15px', background: 'rgba(0,0,0,0.15)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)'}}>
+                   <h3 style={{fontSize: '0.9rem', color: '#94a3b8', marginBottom: '15px'}}>선택지 수동 입력 및 정답 마킹 (우측 클릭)</h3>
+                   {manualOptions.map((opt, idx) => (
+                      <div className="manual-input-row" key={idx}>
+                         <div style={{width: '25px', fontWeight: 'bold', color: '#cbd5e1', fontSize: '1.1rem'}}>{['A','B','C','D','E'][idx]}</div>
+                         <input type="text" className="manual-input-element" placeholder={`보기 ${['A','B','C','D','E'][idx]} 수식/숫자 입력...`}
+                            value={opt} onChange={(e) => {
+                                const newOpts = [...manualOptions];
+                                newOpts[idx] = e.target.value;
+                                setManualOptions(newOpts);
+                            }}
+                         />
+                         <div className={`radio-circle ${manualCorrectIndex === idx ? 'selected' : ''}`} 
+                              onClick={() => setManualCorrectIndex(idx)} title="정답(OMR) 마킹"></div>
+                      </div>
+                   ))}
+                </div>
+              )}
+
+              <button 
+                className="btn-primary" 
+                onClick={handleAnalyze} 
+                disabled={isAnalyzing}
+              >
+                {isAnalyzing ? (
+                  <><span className="spinner"></span> AI 검증 및 문제 분석 진행 중...</>
+                ) : "✨ 2단계: AI 문제 태깅 및 정답 무결성 검증"}
+              </button>
+            </section>
+
+            <section className="card output-section">
+              <h2>2. AI 분석 결과 (Firestore 저장 대기)</h2>
+              
+              {isAnalyzing && (
+                <div style={{display: 'flex', flexDirection: 'column', gap: '15px', marginTop: '10px'}}>
+                   <div className="skeleton" style={{height: '80px', borderRadius: '12px'}}></div>
+                   <div className="skeleton"></div>
+                   <div style={{marginTop: '20px', color: '#94a3b8'}}>문제 성립 여부 및 정답 교차 검증 중... (수학 오류 확인)</div>
+                   <div className="skeleton" style={{height: '150px', borderRadius: '12px'}}></div>
+                </div>
+              )}
+
+              {!isAnalyzing && !result && (
+                <div style={{height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#475569'}}>
+                  좌측에서 문제를 입력하고 AI 검증 스위치를 눌러주세요.
+                </div>
+              )}
+
+              {!isAnalyzing && result && (
+                <div style={{display: 'flex', flexDirection: 'column', gap: '25px', animation: 'fadeIn 0.5s'}}>
+                  
+                  {/* 새롭게 추가된 AI 프리패스 검증 구간 */}
+                  {result.validationStatus === "PASS" && (
+                     <div className="validation-box">
+                        <div className="validation-title">
+                           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                           Gemini 3.1 Pro : 정답 교차 검증 통과 완료!
+                        </div>
+                        <div className="validation-desc">
+                           선생님께서 입력하신 수학 문제는 오류 없이 성립하며, 선생님이 지정하신 정답과 제가 직접 풀어본 정답이 완벽하게 일치합니다. 이제 안심하고 데이터베이스에 기출문제를 저장하셔도 좋습니다!
+                        </div>
+                     </div>
+                  )}
+
+                  <div>
+                     <h3 style={{fontSize: '0.9rem', color: '#94a3b8', marginBottom: '10px'}}>문제 속성 분류 (자동 추출)</h3>
+                     <div className="tags-row">
+                        {result.tags.map((tag, idx) => (
+                          <span key={idx} className="tag-chip">✓ {tag}</span>
+                        ))}
+                        <span className="tag-chip" style={{color: '#f472b6', borderColor: 'rgba(244,114,182,0.3)', background: 'rgba(244,114,182,0.1)'}}>
+                           예상 난이도: {result.initialDifficulty}
+                        </span>
+                     </div>
+                  </div>
+
+                  <div>
+                     <h3 style={{fontSize: '0.9rem', color: '#94a3b8', marginBottom: '10px'}}>
+                        저장될 선택지 내용 ({result.mode === 'manual' ? '선생님 수동 작성 보존' : '오름차순 무작위 분산 생성 완료'})
+                     </h3>
+                     <div className="options-list">
+                        {result.options.map((opt, idx) => (
+                          <div key={idx} className={`option-item ${opt.isCorrect ? 'correct' : ''}`}>
+                             <div className="option-label">
+                                <span className="option-letter">{opt.label}</span>
+                                <span className="option-value">{opt.value}</span>
+                             </div>
+                             {opt.isCorrect && <span className="badge">확정된 정답</span>}
+                          </div>
+                        ))}
+                     </div>
+                  </div>
+
+                  <button className="btn-primary" style={{marginTop: 'auto', background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)'}}>
+                     ☁️ 이상 없음! 기출 데이터베이스 저장
+                  </button>
+                </div>
+              )}
+
+            </section>
+          </main>
+        </>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
+</html>
